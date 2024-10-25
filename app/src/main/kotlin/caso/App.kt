@@ -20,13 +20,21 @@ fun main() {
     println("Pedidos iniciales:")
     viewModel.mostrarPedidos()
 
-    // Actualizar el estado de un pedido
-    viewModel.actualizarEstadoPedido(1, EstadoPedido.PAGADO)
-    println("\nEstado del pedido 1 actualizado:")
-    viewModel.mostrarPedidos()
+    // Intentar confirmar un pedido (debería funcionar si hay existencias)
+    println("\nIntentando confirmar el pedido 1:")
+    viewModel.confirmarPedido(1)
 
-    // Cambiar método de pago
-    viewModel.cambiarMetodoPago(1, MetodoPago.TarjetaCredito("1234567890123456", "12/24", "VISA"))
-    println("\nMétodo de pago del pedido 1 cambiado:")
+    // Intentar confirmar otro pedido
+    println("\nIntentando confirmar el pedido 2:")
+    viewModel.confirmarPedido(2)
+
+    // Registrar un pago parcial para el pedido 1
+    val pago1 = Pago(10.0, MetodoPago.Efectivo("USD"))
+    viewModel.registrarPago(1, pago1)
+
+    // Registrar otro pago para completar el total
+    val pago2 = Pago(8.08, MetodoPago.TarjetaCredito("1234567890123456", "12/24", "VISA"))
+    viewModel.registrarPago(1, pago2)
+
     viewModel.mostrarPedidos()
 }
