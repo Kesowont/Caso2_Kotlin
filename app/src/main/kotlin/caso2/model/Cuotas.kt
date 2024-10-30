@@ -9,10 +9,6 @@ class Cuotas(
         return idCuotas
     }
 
-    fun getEstado(): String {
-        return estado
-    }
-
     fun getAporte(): Float {
         return aporte
     }
