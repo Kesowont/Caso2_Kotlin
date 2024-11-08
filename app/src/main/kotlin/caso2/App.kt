@@ -15,7 +15,8 @@ class App {
                 "2" -> view.crearProducto()
                 "3" -> view.crearPedido()
                 "4" -> view.mostrarPedidos()
-                "5" -> {
+                "5" -> view.realizarPago()
+                "6" -> {
                     println("¡Hasta luego!")
                     return
                 }

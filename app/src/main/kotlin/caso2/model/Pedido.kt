@@ -82,4 +82,13 @@ class Pedido(
     override fun toString(): String {
         return generarResumen()
     }
+
+    fun getTotalPagado(): Float {
+        return pagos.sumOf { it.getMonto().toDouble() }.toFloat()
+    }
+
+    fun getMontoFaltante(): Float {
+        return total - getTotalPagado()
+    }
+
 }
