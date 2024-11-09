@@ -11,10 +11,10 @@ class PedidoView(private val viewModel: PedidoViewModel) {
         println("3. Crear Pedido")
         println("4. Ver Pedidos")
         println("5. Realizar Pago")
-        println("6. Salir")
+        println("6. Actualizar Estado del Pedido")
+        println("7. Salir")
         print("Seleccione una opción: ")
     }
-
 
     fun crearCliente() {
         print("ID del cliente: ")
@@ -64,6 +64,7 @@ class PedidoView(private val viewModel: PedidoViewModel) {
             return
         }
 
+        // Crea el pedido temporalmente
         val pedido = viewModel.crearPedido(clientes[clienteIndex])
         println("Pedido creado para ${clientes[clienteIndex].getNombre()}")
 
@@ -88,7 +89,72 @@ class PedidoView(private val viewModel: PedidoViewModel) {
             println("Producto agregado al pedido.")
         }
 
-        println("Pedido finalizado: $pedido")
+        // Confirmación y opciones de modificación
+        while (true) {
+            println("\nProductos en el pedido:")
+            pedido.getProductos().forEachIndexed { index, productoPedido ->
+                println("${index + 1}. ${productoPedido.getProducto().getNombre()} - Cantidad: ${productoPedido.getCantidad()}")
+            }
+            println("\n¿Está de acuerdo con los detalles del pedido? (Sí/No)")
+            val confirmacion = readLine()?.trim()?.lowercase()
+
+            if (confirmacion == "sí" || confirmacion == "si") {
+                // Confirmación de pedido
+                if (pedido.getProductos().isEmpty()) {
+                    println("El pedido no tiene productos. Se eliminará el pedido.")
+                    viewModel.eliminarPedido(pedido)
+                } else {
+                    println("Pedido finalizado y registrado:\n$pedido")
+                }
+                break
+            } else if (confirmacion == "no") {
+                // Opciones de modificación
+                println("Seleccione una opción:")
+                println("1. Eliminar todo el pedido")
+                println("2. Eliminar algún producto del pedido")
+                print("Seleccione una opción: ")
+                val opcion = readLine()?.toIntOrNull()
+
+                when (opcion) {
+                    1 -> {
+                        viewModel.eliminarPedido(pedido)
+                        println("El pedido ha sido eliminado por completo.")
+                        return
+                    }
+                    2 -> {
+                        // Mostrar productos en el pedido para eliminar
+                        while (true) {
+                            if (pedido.getProductos().isEmpty()) {
+                                println("El pedido no tiene productos restantes.")
+                                viewModel.eliminarPedido(pedido)
+                                return
+                            }
+
+                            println("\nProductos en el pedido:")
+                            pedido.getProductos().forEachIndexed { index, productoPedido ->
+                                println("${index + 1}. ${productoPedido.getProducto().getNombre()} - Cantidad: ${productoPedido.getCantidad()}")
+                            }
+                            print("Seleccione el número del producto a eliminar (0 para finalizar): ")
+                            val productoAEliminarIndex = readLine()?.toIntOrNull()?.minus(1) ?: continue
+                            if (productoAEliminarIndex == -1) break
+                            if (productoAEliminarIndex !in pedido.getProductos().indices) {
+                                println("Selección inválida.")
+                                continue
+                            }
+
+                            viewModel.eliminarProductoDePedido(pedido, pedido.getProductos()[productoAEliminarIndex])
+                            println("Producto eliminado del pedido.")
+                        }
+                    }
+                    else -> {
+                        println("Opción inválida.")
+                        continue
+                    }
+                }
+            } else {
+                println("Respuesta inválida. Por favor, ingrese 'Sí' o 'No'.")
+            }
+        }
     }
 
     fun mostrarPedidos() {
@@ -189,4 +255,48 @@ class PedidoView(private val viewModel: PedidoViewModel) {
         println("Monto Faltante: ${pedido.getMontoFaltante()}")
     }
 
+    fun actualizarEstadoPedido() {
+        val pedidos = viewModel.obtenerPedidos()
+        if (pedidos.isEmpty()) {
+            println("No hay pedidos registrados.")
+            return
+        }
+
+        println("\nPedidos disponibles para actualizar el estado:")
+        pedidos.forEachIndexed { index, pedido ->
+            println("${index + 1}. Pedido #${pedido.getIdPedido()} - Estado: ${pedido.getEstado()} - Total: ${pedido.getTotal()}")
+            println("Total Pagado: ${pedido.getTotalPagado()}")
+            println("Monto Faltante: ${pedido.getMontoFaltante()}")
+        }
+        print("Seleccione el número del pedido: ")
+        val pedidoIndex = readLine()?.toIntOrNull()?.minus(1) ?: return
+        if (pedidoIndex !in pedidos.indices) {
+            println("Selección inválida.")
+            return
+        }
+
+        val pedido = pedidos[pedidoIndex]
+        if (pedido.getEstado() == Pedido.EstadoPedido.PENDIENTE && pedido.getMontoFaltante() > 0) {
+            println("El pedido no está pagado en su totalidad. No se puede actualizar el estado.")
+            return
+        }
+
+        val siguienteEstado = pedido.obtenerSiguienteEstado()
+        if (siguienteEstado == null) {
+            println("El pedido ya está en su estado final: ${pedido.getEstado()}")
+            return
+        }
+
+        // Confirmación para actualizar el estado
+        println("El estado actual del pedido es: ${pedido.getEstado()}. El siguiente estado será: $siguienteEstado.")
+        print("¿Desea actualizar el estado del pedido a $siguienteEstado? (Sí/No): ")
+        val confirmacion = readLine()?.trim()?.lowercase()
+
+        if (confirmacion == "sí" || confirmacion == "si") {
+            viewModel.actualizarEstadoPedidoManual(pedido)
+            println("El estado del pedido ha sido actualizado a: $siguienteEstado")
+        } else {
+            println("El estado del pedido no ha sido cambiado.")
+        }
+    }
 }

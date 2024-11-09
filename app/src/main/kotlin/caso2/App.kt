@@ -16,7 +16,8 @@ class App {
                 "3" -> view.crearPedido()
                 "4" -> view.mostrarPedidos()
                 "5" -> view.realizarPago()
-                "6" -> {
+                "6" -> view.actualizarEstadoPedido()
+                "7" -> {
                     println("¡Hasta luego!")
                     return
                 }

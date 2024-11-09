@@ -37,6 +37,11 @@ class Pedido(
         verificarDisponibilidad()
     }
 
+    fun eliminarProducto(productoPedido: ProductoPedido){
+        productos.remove(productoPedido)
+        calcularTotal()
+    }
+
     fun agregarPago(pago: Pago) {
         pagos.add(pago)
         actualizarEstadoPago()
@@ -61,22 +66,45 @@ class Pedido(
         }
     }
 
-    fun actualizarEstado(nuevoEstado: EstadoPedido) {
-        estado = nuevoEstado
+    fun actualizarEstado() {
+        val siguienteEstado = obtenerSiguienteEstado()
+        if (siguienteEstado == null) {
+            println("El pedido ya está en su estado final: $estado. No se puede avanzar a un estado posterior.")
+            return
+        }
+
+        if (estado == EstadoPedido.PENDIENTE && getMontoFaltante() > 0) {
+            println("El pedido no está pagado en su totalidad. No se puede actualizar el estado.")
+            return
+        }
+
+        estado = siguienteEstado
+        println("Estado del pedido actualizado a: $estado")
     }
+
+    fun obtenerSiguienteEstado(): EstadoPedido? {
+        return when (estado) {
+            EstadoPedido.PENDIENTE -> EstadoPedido.PAGADO
+            EstadoPedido.PAGADO -> EstadoPedido.PROCESANDO
+            EstadoPedido.PROCESANDO -> EstadoPedido.ENVIADO
+            EstadoPedido.ENVIADO -> EstadoPedido.ENTREGADO
+            EstadoPedido.ENTREGADO -> null // No hay estado siguiente después de "ENTREGADO"
+        }
+    }
+
     // Método para generar un resumen del pedido
     fun generarResumen(): String {
         return """
-            Pedido #$idPedido
-            Cliente: ${cliente.getNombre()}
-            Fecha: $fecha
-            Estado: $estado
-            Productos:
-            ${productos.joinToString("\n") { "- ${it .toString()}" }}
-            Total: $total
-            Disponible: $disponible
-            Pagos realizados: ${pagos.size}
-        """.trimIndent()
+Pedido #$idPedido
+Cliente: ${cliente.getNombre()}
+Fecha: $fecha
+Estado: $estado
+Productos:
+${productos.joinToString("\n") { "- ${it .toString()}" }}
+Total: $total
+Disponible: $disponible
+Pagos realizados: ${pagos.size}
+""".trimIndent()
     }
 
     override fun toString(): String {

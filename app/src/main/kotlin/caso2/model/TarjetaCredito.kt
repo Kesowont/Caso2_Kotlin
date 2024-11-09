@@ -44,12 +44,6 @@ class TarjetaCredito(
         return cuotasList
     }
 
-    fun marcarCuotaComoPagada(numeroCuota: Int) {
-        if (numeroCuota in 0 until cuotasList.size) {
-            cuotasList[numeroCuota].estado = "completo"
-        }
-    }
-
     override fun detallesPago(): String {
         return super.detallesPago() + ", Número: $numero, Fecha de Caducidad: $fechaCaducidad, Tipo: $tipo, Cuotas: ${cuotasList.joinToString { it.detallesCuotas() }}"
     }

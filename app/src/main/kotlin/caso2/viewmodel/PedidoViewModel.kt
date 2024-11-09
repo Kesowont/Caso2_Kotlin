@@ -26,6 +26,14 @@ class PedidoViewModel {
         return nuevoPedido
     }
 
+    fun eliminarPedido(pedido: Pedido) {
+        pedidos.remove(pedido)
+    }
+
+    fun eliminarProductoDePedido(pedido: Pedido, productoPedido: ProductoPedido) {
+        pedido.eliminarProducto(productoPedido)
+    }
+
     fun agregarProductoAPedido(pedido: Pedido, producto: Producto, cantidad: Int) {
         val productoPedido = ProductoPedido(producto, cantidad)
         pedido.agregarProducto(productoPedido)
@@ -33,10 +41,6 @@ class PedidoViewModel {
 
     fun procesarPago(pedido: Pedido, pago: Pago) {
         pedido.agregarPago(pago)
-    }
-
-    fun actualizarEstadoPedido(pedido: Pedido, nuevoEstado: Pedido.EstadoPedido) {
-        pedido.actualizarEstado(nuevoEstado)
     }
 
     fun crearPagoEfectivo(idPago: Int, monto: Float, moneda: String = "PEN"): Efectivo {
@@ -51,6 +55,9 @@ class PedidoViewModel {
         return TarjetaCredito(idPago, monto, numero, fechaCaducidad, tipo, cuotas, interes)
     }
 
+    fun actualizarEstadoPedidoManual(pedido: Pedido) {
+        pedido.actualizarEstado()
+    }
 
     fun obtenerPedidos(): List<Pedido> = pedidos
     fun obtenerClientes(): List<Cliente> = clientes
